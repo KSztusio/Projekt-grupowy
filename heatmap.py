@@ -13,7 +13,6 @@ class HeatmapApp(tk.Tk):
         self.title("Heatmap Application")
         self.geometry("800x600")
 
-        # Dodanie przycisku do otwierania pliku
         self.open_button = tk.Button(self, text="Open File", command=self.load_file)
         self.open_button.pack(pady=10)
 
@@ -34,7 +33,6 @@ class HeatmapApp(tk.Tk):
                 tk.messagebox.showerror("Error", f"An error occurred: {e}")
 
     def process_file(self, file_path):
-        # Wczytywanie danych z pliku
         with open(file_path, 'rt') as plik:
             l = 1
             azimuth = 0
