@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.tri as tri
 
 class HeatmapApp(tk.Tk):
     def __init__(self):
@@ -84,15 +85,20 @@ class HeatmapApp(tk.Tk):
 
         # Tworzenie danych dla siatki polarnej
         radian, azimuth = grid.shape
-        theta = np.linspace(np.radians(extent[0]), np.radians(extent[1]), azimuth + 1)
-        radii = np.linspace(0, extent[3], radian + 1)
+        theta = np.linspace(np.radians(extent[0]), np.radians(extent[1]), azimuth)
+        radii = np.linspace(0, extent[3], radian)
         theta_grid, radii_grid = np.meshgrid(theta, radii)
+
+        # Przekształcenie siatki na listy współrzędnych i wartości
+        theta_flat = theta_grid.flatten()
+        radii_flat = radii_grid.flatten()
+        values = grid.flatten()
 
         # Tworzenie wykresu
         fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
         custom_cmap = LinearSegmentedColormap.from_list("custom", ["#0000FF", "#00FF00", "#FCFC00", "#FC0000"])
-        c = ax.pcolormesh(theta_grid, radii_grid, grid, cmap=custom_cmap, shading='auto')
-        fig.colorbar(c, label='Value')
+        scatter = ax.scatter(theta_flat, radii_flat, c=values, cmap=custom_cmap, s=10)  # `s` kontroluje rozmiar punktów
+        fig.colorbar(scatter, label='Value')
         ax.set_title('Heatmap')
 
         # Dodanie wykresu do Tkinter
@@ -100,6 +106,7 @@ class HeatmapApp(tk.Tk):
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack(fill=tk.BOTH, expand=True)
         canvas.draw()
+
 
 # Uruchomienie aplikacji
 if __name__ == "__main__":
