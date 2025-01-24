@@ -4,8 +4,9 @@ from tkinter import filedialog
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import Normalize
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+import subprocess
 class HeatmapApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -22,13 +23,14 @@ class HeatmapApp(tk.Tk):
 
     def load_file(self):
         # Otwórz okno dialogowe, aby wybrać plik
-        file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
-
+        file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.mat")])
+        p = subprocess.Popen(["t1.exe", file_path])
+        p.wait()
         if file_path:
             try:
                 # Wczytaj dane i stwórz heatmapę
-                grid, extent = self.process_file(file_path)
-                self.display_heatmap(grid, extent)
+                grid, extent, deadzone_dis = self.process_file("dane.txt")
+                self.display_heatmap(grid, extent, deadzone_dis)
             except Exception as e:
                 tk.messagebox.showerror("Error", f"An error occurred: {e}")
 
@@ -40,18 +42,22 @@ class HeatmapApp(tk.Tk):
             angle = 0
             radian = 0
             distance = 0
+            deadzone_dis = 0
             value = []
 
-            for i in range(4):
+            for i in range(6):
                 line = plik.readline()
+                print(line)
                 elements = re.split(r"[\s]+", line)
-                if l == 2:
+                if l == 6:
                     step = int(elements[1])
                     radian = int(elements[2])
-                if l == 4:
+                if l == 2:
                     angle_start = int(elements[0])
                     angle = int(elements[1])
                     azimuth = int(elements[2])
+                if l == 4:
+                    deadzone_dis = int(elements[0])
                 if not line:
                     break
                 l += 1
@@ -74,10 +80,10 @@ class HeatmapApp(tk.Tk):
             radian = max(radian, 1)
             distance = max(distance, 1)
 
-        extent = (angle_start, angle_start + azimuth * angle, 0, radian * distance)
-        return grid, extent
+        extent = (angle_start, angle_start + azimuth * angle, deadzone_dis, radian * distance)
+        return grid, extent, deadzone_dis
 
-    def display_heatmap(self, grid, extent):
+    def display_heatmap(self, grid, extent, deadzone_dis):
         # Usuń poprzedni wykres, jeśli istnieje
         for widget in self.canvas_frame.winfo_children():
             widget.destroy()
@@ -85,13 +91,13 @@ class HeatmapApp(tk.Tk):
         # Tworzenie danych dla siatki polarnej
         radian, azimuth = grid.shape
         theta = np.linspace(np.radians(extent[0]), np.radians(extent[1]), azimuth + 1)
-        radii = np.linspace(0, extent[3], radian + 1)
+        radii = np.linspace(extent[2], extent[3], radian + 1)
         theta_grid, radii_grid = np.meshgrid(theta, radii)
-
         # Tworzenie wykresu
         fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-        custom_cmap = LinearSegmentedColormap.from_list("custom", ["#0000FF", "#00FF00", "#FCFC00", "#FC0000"])
-        c = ax.pcolormesh(theta_grid, radii_grid, grid, cmap=custom_cmap, shading='auto')
+        custom_cmap = LinearSegmentedColormap.from_list("custom", ["#0000FF", "#00FF00", "#FFFF00", "#FF0000"])
+        norm = Normalize(vmin=0, vmax=3)
+        c = ax.pcolormesh(theta_grid, radii_grid, grid, cmap=custom_cmap, shading='auto', norm = norm)
         fig.colorbar(c, label='Value')
         ax.set_title('Heatmap')
 
