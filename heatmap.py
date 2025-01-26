@@ -24,6 +24,8 @@ class HeatmapApp(tk.Tk):
     def load_file(self):
         # Otwórz okno dialogowe, aby wybrać plik
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.mat")])
+        p0 = subprocess.Popen(["t0.exe", file_path])
+        p0.wait()
         p = subprocess.Popen(["t1.exe", file_path])
         p.wait()
         if file_path:
