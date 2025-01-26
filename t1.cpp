@@ -6,17 +6,20 @@ using namespace std;
 double string_to_double(string number);
 float exp(int n);
 int main(int argc, char* argv[]){
-    int k, columns_n, n1_n, n2_n, step;
+    int k, columns_n, n1_n, n2_n, step, elevation = 0;
     string file_name = "data.mat";
     if (argc > 1) {
         file_name = argv[1];
+    } 
+    if (argc > 2) {
+        elevation  = stoi(argv[2]);
     } 
     string b, name, type, x, y, columns, n1, n2, deadzone;
     double xf, yf, w;
     fstream plik;
     fstream plikzap;
     plik.open(file_name, ios::in);
-    plikzap.open("dane.txt", ios::out);
+    plikzap.open("danetest.txt", ios::out);
     if (plik.is_open() && plikzap.is_open()){
         int j = 0;
         while(!plik.eof()){
@@ -33,6 +36,7 @@ int main(int argc, char* argv[]){
             if (name == "signal"){
                 if (b.length() > 4){
                     if(b[1] == '('){
+                        if (j % 36 == elevation){
                         bool g = true;
                         for(int i = 2; i < b.length()-1; i++) {
                             if(b[i]!=','){
@@ -45,7 +49,7 @@ int main(int argc, char* argv[]){
                                 g = false;
                             }   
                         }
-                        if (j % 36 == 5){
+                        
                             xf = string_to_double(x);
                             yf = string_to_double(y);
                             w = sqrt((xf*xf)+(yf*yf));
