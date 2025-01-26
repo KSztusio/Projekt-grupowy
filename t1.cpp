@@ -101,7 +101,7 @@ void process_file_chunk(fstream& file, streampos start, streampos end, int threa
 int main(int argc, char* argv[]) {
     int tstart = clock();
 
-    string file_name = "C:\\Users\\dpski\\OneDrive\\Pulpit\\PG5\\projekt_grupowy\\data.mat";
+    string file_name = "data.mat";
     if (argc > 1) {
         file_name = argv[1];
     }
