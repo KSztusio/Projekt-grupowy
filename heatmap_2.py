@@ -18,37 +18,35 @@ class HeatmapApp(tk.Tk):
         self.open_button = tk.Button(self, text="Open File", command=self.load_file)
         self.open_button.pack(pady=10)
 
+        self.change_elevation_button = tk.Button(self, text="Change Elevation", command=self.change_elevation)
+        self.change_elevation_button.pack(pady=10)
+
         # Kontener na wykres
         self.canvas_frame = tk.Frame(self)
         self.canvas_frame.pack(fill=tk.BOTH, expand=True)
 
     def load_file(self):
-        
-        file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.mat")])
-
-        if file_path:
+        self.file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.mat")])
+        if self.file_path:
             try:
-                elevations = self.read_elevations(file_path)
-                selected_elevation = self.select_elevation(elevations)
-                if selected_elevation is not None:
-            #         p = subprocess.Popen(["C:\\Users\\pauli\\OneDrive\\Pulpit\\Studia\\Semestr 5\\PROJEKT GRUPOWY\\Projekt-grupowy\\t1.exe", file_path, str(selected_elevation)])
-            #         p.wait()
-            #         # Wczytaj dane i stwórz heatmapę
-            #         grid, extent, deadzone_dis = self.process_file("dane.txt")
-            #         self.display_heatmap(grid, extent, deadzone_dis)
-            # except Exception as e:
-            #     tk.messagebox.showerror("Error", f"An error occurred: {e}")
-                    p = subprocess.Popen(["C:\\Users\\pauli\\OneDrive\\Pulpit\\Studia\\Semestr 5\\PROJEKT GRUPOWY\\Projekt-grupowy\\t1.exe", file_path, str(selected_elevation)])
-                    p.wait()
-                    if file_path:
-                        try:
-                        # Wczytaj dane i stwórz heatmapę
-                            grid, extent, deadzone_dis = self.process_file("dane.txt")
-                            self.display_heatmap(grid, extent, deadzone_dis)
-                        except Exception as e:
-                            tk.messagebox.showerror("Error", f"An error occurred: {e}")
+                self.elevations = self.read_elevations(self.file_path)
+                self.selected_elevation = self.select_elevation(self.elevations)
+                if self.selected_elevation is not None:
+                    self.update_heatmap()
             except Exception as e:
                 tk.messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def change_elevation(self):
+        if hasattr(self, 'elevations'):
+            self.selected_elevation = self.select_elevation(self.elevations)
+            if self.selected_elevation is not None:
+                self.update_heatmap()
+
+    def update_heatmap(self):
+        p = subprocess.Popen(["C:\\Users\\pauli\\OneDrive\\Pulpit\\Studia\\Semestr 5\\PROJEKT GRUPOWY\\Projekt-grupowy\\t1.exe", self.file_path, str(self.selected_elevation)])
+        p.wait()
+        grid, extent, deadzone_dis = self.process_file("dane.txt")
+        self.display_heatmap(grid, extent, deadzone_dis)
 
     def read_elevations(self, file_path):
         elevations = []
@@ -62,6 +60,7 @@ class HeatmapApp(tk.Tk):
                     line = plik.readline().strip()
                     elevations.extend(map(int, line.split()))
         return elevations
+
 
     def select_elevation(self, elevations):
         if not elevations:
