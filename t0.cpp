@@ -6,7 +6,7 @@
 #include <vector>
 #include <mutex>
 
-#define LICZBA_WATKOW 6 // TODO dynamiczny przydzal
+#define LICZBA_WATKOW 10 // TODO dynamiczny przydzal 2 * hc-1
 
 using namespace std;
 
@@ -99,7 +99,7 @@ void process_file_chunk(fstream& file, streampos start, streampos end, int threa
 }
 
 int main(int argc, char* argv[]) {
-    int tstart = clock();
+    //int tstart = clock();
 
     string file_name = "data.mat";
     if (argc > 1) {
