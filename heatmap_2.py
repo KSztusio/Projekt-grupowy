@@ -21,17 +21,17 @@ class HeatmapApp(tk.Tk):
         self.open_button = tk.Button(button_frame, text="Open File", command=self.load_file)
         self.open_button.grid(row=0, column=0, padx=5)
 
-        self.change_elevation_button = tk.Button(button_frame, text="Change Elevation", command=self.change_elevation)
+        self.change_elevation_button = tk.Button(button_frame, text="Change Elevation", command=self.change_elevation, state=tk.DISABLED)
         self.change_elevation_button.grid(row=0, column=1, padx=5)
 
         self.log_scale_var = tk.BooleanVar()
-        self.log_scale_checkbox = tk.Checkbutton(button_frame, text="Logarithmic Scale", variable=self.log_scale_var, command=self.toggle_log_scale)
+        self.log_scale_checkbox = tk.Checkbutton(button_frame, text="Logarithmic Scale", variable=self.log_scale_var, command=self.toggle_log_scale, state=tk.DISABLED)
         self.log_scale_checkbox.grid(row=0, column=6, padx=5)
 
-        self.heatmap_button = tk.Button(button_frame, text="Heatmap", command=self.update_heatmap)
+        self.heatmap_button = tk.Button(button_frame, text="Heatmap", command=self.update_heatmap, state=tk.DISABLED)
         self.heatmap_button.grid(row=0, column=3, padx=5, pady=5)
 
-        self.spectrogram_button = tk.Button(button_frame, text="Spectrogram", command=self.display_spectrogram)
+        self.spectrogram_button = tk.Button(button_frame, text="Spectrogram", command=self.display_spectrogram, state=tk.DISABLED)
         self.spectrogram_button.grid(row=0, column=4, padx=5, pady=5)
 
         self.empty_button1 = tk.Button(button_frame, text="Button 1")
@@ -46,9 +46,11 @@ class HeatmapApp(tk.Tk):
         self.empty_button4 = tk.Button(button_frame, text="Button 4")
         self.empty_button4.grid(row=0, column=9, padx=5, pady=5)
 
-        # Kontener na wykres
         self.canvas_frame = tk.Frame(self)
         self.canvas_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.save_button = tk.Button(self, text="Save Heatmap", command=self.save_heatmap, state=tk.DISABLED)
+        self.save_button.pack(pady=10)
 
     def load_file(self):
         self.file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.mat")])
@@ -58,6 +60,10 @@ class HeatmapApp(tk.Tk):
                 self.selected_elevation = self.select_elevation(self.elevations)
                 if self.selected_elevation is not None:
                     self.update_heatmap()
+                    self.heatmap_button.config(state=tk.NORMAL)
+                    self.change_elevation_button.config(state=tk.NORMAL)
+                    self.log_scale_checkbox.config(state=tk.NORMAL)
+                    self.spectrogram_button.config(state=tk.NORMAL)
             except Exception as e:
                 tk.messagebox.showerror("Error", f"An error occurred: {e}")
 
@@ -78,10 +84,8 @@ class HeatmapApp(tk.Tk):
         with open(file_path, 'rt') as plik:
             for line in plik:
                 if "# name: elevationRaster" in line:
-                    # Skip the next three lines starting with #
                     for _ in range(3):
                         plik.readline()
-                    # Read the numbers
                     line = plik.readline().strip()
                     elevations.extend(map(int, line.split()))
         return elevations
@@ -93,7 +97,7 @@ class HeatmapApp(tk.Tk):
             return None
 
         elevation_var = tk.StringVar(self)
-        elevation_var.set(elevations[0])  # Set the default value to the first elevation
+        elevation_var.set(elevations[0])  
 
         elevation_window = tk.Toplevel(self)
         elevation_window.title("Select Elevation")
@@ -180,26 +184,33 @@ class HeatmapApp(tk.Tk):
         radii = np.linspace(extent[2], extent[3], radian + 1)
         theta_grid, radii_grid = np.meshgrid(theta, radii)
         # Tworzenie wykresu
-        fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+        self.fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
         custom_cmap = LinearSegmentedColormap.from_list("custom", ["#0000FF", "#00FF00", "#FFFF00", "#FF0000"])
         norm = Normalize(vmin=0, vmax=3)
         c = ax.pcolormesh(theta_grid, radii_grid, grid, cmap=custom_cmap, shading='auto', norm=norm)
-        fig.colorbar(c, label='Value')
+        self.fig.colorbar(c, label='Value')
         ax.set_title('Heatmap')
 
-        # Dodanie wykresu do Tkinter
-        canvas = FigureCanvasTkAgg(fig, self.canvas_frame)
+        canvas = FigureCanvasTkAgg(self.fig, self.canvas_frame)
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack(fill=tk.BOTH, expand=True)
         canvas.draw()
 
+        self.save_button.config(state=tk.NORMAL)
+
     def display_spectrogram(self):
-        # Placeholder function for displaying spectrogram
+        
         pass
 
     def toggle_log_scale(self):
-        # Placeholder function for toggling logarithmic scale
+        
         pass
+
+    def save_heatmap(self):
+        if hasattr(self, 'fig'):
+            file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("JPG files", "*.jpg")])
+            if file_path:
+                self.fig.savefig(file_path)
 
 # Uruchomienie aplikacji
 if __name__ == "__main__":
