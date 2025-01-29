@@ -15,11 +15,36 @@ class HeatmapApp(tk.Tk):
         self.title("Heatmap Application")
         self.geometry("800x600")
 
-        self.open_button = tk.Button(self, text="Open File", command=self.load_file)
-        self.open_button.pack(pady=10)
+        button_frame = tk.Frame(self)
+        button_frame.pack(pady=10)
 
-        self.change_elevation_button = tk.Button(self, text="Change Elevation", command=self.change_elevation)
-        self.change_elevation_button.pack(pady=10)
+        self.open_button = tk.Button(button_frame, text="Open File", command=self.load_file)
+        self.open_button.grid(row=0, column=0, padx=5)
+
+        self.change_elevation_button = tk.Button(button_frame, text="Change Elevation", command=self.change_elevation)
+        self.change_elevation_button.grid(row=0, column=1, padx=5)
+
+        self.log_scale_var = tk.BooleanVar()
+        self.log_scale_checkbox = tk.Checkbutton(button_frame, text="Logarithmic Scale", variable=self.log_scale_var, command=self.toggle_log_scale)
+        self.log_scale_checkbox.grid(row=0, column=6, padx=5)
+
+        self.heatmap_button = tk.Button(button_frame, text="Heatmap", command=self.update_heatmap)
+        self.heatmap_button.grid(row=0, column=3, padx=5, pady=5)
+
+        self.spectrogram_button = tk.Button(button_frame, text="Spectrogram", command=self.display_spectrogram)
+        self.spectrogram_button.grid(row=0, column=4, padx=5, pady=5)
+
+        self.empty_button1 = tk.Button(button_frame, text="Button 1")
+        self.empty_button1.grid(row=0, column=5, padx=5, pady=5)
+
+        self.empty_button2 = tk.Button(button_frame, text="Button 2")
+        self.empty_button2.grid(row=0, column=7, padx=5, pady=5)
+
+        self.empty_button3 = tk.Button(button_frame, text="Button 3")
+        self.empty_button3.grid(row=0, column=8, padx=5, pady=5)
+
+        self.empty_button4 = tk.Button(button_frame, text="Button 4")
+        self.empty_button4.grid(row=0, column=9, padx=5, pady=5)
 
         # Kontener na wykres
         self.canvas_frame = tk.Frame(self)
@@ -141,7 +166,10 @@ class HeatmapApp(tk.Tk):
         extent = (angle_start, angle_start + azimuth * angle, deadzone_dis, radian * distance)
         return grid, extent, deadzone_dis
 
-    def display_heatmap(self, grid, extent, deadzone_dis):
+    def display_heatmap(self, grid=None, extent=None, deadzone_dis=None):
+        if grid is None or extent is None or deadzone_dis is None:
+            return
+
         # Usuń poprzedni wykres, jeśli istnieje
         for widget in self.canvas_frame.winfo_children():
             widget.destroy()
@@ -155,7 +183,7 @@ class HeatmapApp(tk.Tk):
         fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
         custom_cmap = LinearSegmentedColormap.from_list("custom", ["#0000FF", "#00FF00", "#FFFF00", "#FF0000"])
         norm = Normalize(vmin=0, vmax=3)
-        c = ax.pcolormesh(theta_grid, radii_grid, grid, cmap=custom_cmap, shading='auto', norm = norm)
+        c = ax.pcolormesh(theta_grid, radii_grid, grid, cmap=custom_cmap, shading='auto', norm=norm)
         fig.colorbar(c, label='Value')
         ax.set_title('Heatmap')
 
@@ -164,6 +192,14 @@ class HeatmapApp(tk.Tk):
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack(fill=tk.BOTH, expand=True)
         canvas.draw()
+
+    def display_spectrogram(self):
+        # Placeholder function for displaying spectrogram
+        pass
+
+    def toggle_log_scale(self):
+        # Placeholder function for toggling logarithmic scale
+        pass
 
 # Uruchomienie aplikacji
 if __name__ == "__main__":
