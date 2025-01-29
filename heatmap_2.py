@@ -167,7 +167,7 @@ class HeatmapApp(tk.Tk):
             radian = max(radian, 1)
             distance = max(distance, 1)
 
-        extent = (angle_start, angle_start + azimuth * angle, deadzone_dis, radian * distance)
+        extent = (angle_start, angle_start + azimuth * angle, deadzone_dis, radian * step)
         return grid, extent, deadzone_dis
 
     def display_heatmap(self, grid=None, extent=None, deadzone_dis=None):
